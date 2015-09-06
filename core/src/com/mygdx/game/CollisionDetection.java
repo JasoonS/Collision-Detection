@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
@@ -26,11 +27,11 @@ public class CollisionDetection extends ApplicationAdapter {
 		{1,0,0,0,0,0,0,0,0,0,0,0,0,0,1}, 
 		{1,0,0,0,0,0,0,0,0,0,0,0,0,0,1}, 
 		{1,0,0,0,0,0,0,0,0,0,0,0,0,0,1}, 
-		{1,0,1,1,0,0,0,0,0,0,0,0,0,0,1}, 
 		{1,0,0,0,0,0,0,0,0,0,0,0,0,0,1}, 
 		{1,0,0,0,0,0,0,0,0,0,0,0,0,0,1}, 
-		{1,0,0,0,0,1,1,0,0,0,0,0,0,0,1}, 
-		{1,0,0,0,0,0,1,0,0,0,0,0,0,0,1}, 
+		{1,0,0,0,0,0,0,0,0,0,0,0,0,0,1}, 
+		{1,0,0,0,0,0,0,0,0,0,0,0,0,0,1}, 
+		{1,0,0,0,0,0,0,0,0,0,0,0,0,0,1}, 
 		{1,0,0,0,0,0,0,0,0,0,0,0,0,0,1}, 
 		{1,0,0,0,0,0,0,0,0,0,0,0,0,0,1}, 
 		{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}, 
@@ -40,6 +41,7 @@ public class CollisionDetection extends ApplicationAdapter {
 	int tileSize = 20;
 	Texture tileTexture;
 	
+	Player player;
 	ArrayList<Entity> entities = new ArrayList<Entity>();
 	
 	enum Axis { X, Y };
@@ -53,13 +55,17 @@ public class CollisionDetection extends ApplicationAdapter {
 	  screenHeight = Gdx.graphics.getHeight();
 	 	  
 	  // add some entities including a player
-	  entities.add(new Player(this, 100, 150, 20, 20, 120.0f, new Texture("player.png")));
-	  entities.add(new Entity(this, 56, 163, 20, 20, 120.0f, new Texture("enemy.png")));
-//	  entities.add(new Entity(this, 200, 200, 20, 20, 120.0f, new Texture("enemy.png")));
-//	  entities.add(new Entity(this, 180, 50, 20, 20, 120.0f, new Texture("enemy.png")));
+	  player = new Player(this, 200, 150, 20, 20, 120.0f, new Texture("1.png"));
+	  entities.add(player);
+	  entities.add(new Entity(this, 56, 200, 20, 20, 120.0f, new Texture("2.png")));
+	  entities.add(new Entity(this, 200, 200, 20, 20, 120.0f, new Texture("3.png")));
+	  entities.add(new Entity(this, 180, 50, 20, 20, 120.0f, new Texture("4.png")));
   }
   
   public void moveEntity(Entity e, float newX, float newY) {
+	//for this test only the player is moving
+	  if(!e.equals(player)) return;
+	  
 	  // just check x collisions keep y the same
 	  moveEntityInAxis(e, Axis.X, newX, e.y);
 	  // just check y collisions keep x the same
@@ -67,6 +73,7 @@ public class CollisionDetection extends ApplicationAdapter {
   }
   
   public void moveEntityInAxis(Entity e, Axis axis, float newX, float newY) {
+		  
 	  Direction direction;
 	  
 	  // determine axis direction
@@ -80,6 +87,7 @@ public class CollisionDetection extends ApplicationAdapter {
 	  }
 
 	  if(!tileCollision(e, direction, newX, newY) && !entityCollision(e, direction, newX, newY)) {
+//		  System.out.println("M - x:" + newX + " y:" + newY);
 		  // full move with no collision
 		  e.move(newX, newY);
 	  }
@@ -118,17 +126,18 @@ public class CollisionDetection extends ApplicationAdapter {
 		  
 		  // we don't want to check for collisions between the same entity
 		  if(e1 != e2) {
-			  // axis aligned rectangle rectangle collision detection
+			  // bounding box
 			  if(newX < e2.x + e2.width && e2.x < newX + e1.width &&
 				  newY < e2.y + e2.height && e2.y < newY + e1.height) {
-				  collision = true;
+
+//				  System.out.println("entity within BOUNDING BOX around: " + newX + " " + newY);
 				  
-				  e1.entityCollision(e2, newX, newY, direction);
+				  if(e1.entityCollision(e2, newX, newY, direction)) return true;
 			  }
 		  }
 	  }
 	  
-	  return collision;
+	  return false;
   }
 
   @Override

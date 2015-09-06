@@ -19,16 +19,16 @@ public class Player extends Entity {
 
 		// move
 		if(Gdx.input.isKeyPressed(Keys.UP)) {
-			dy = speed * delta;
+			dy = 1;//speed * delta;
 		}
 		if(Gdx.input.isKeyPressed(Keys.DOWN)) {
-			dy = -speed * delta;
+			dy = -1;//-speed * delta;
 		}
 		if(Gdx.input.isKeyPressed(Keys.LEFT)) {
-			dx = -speed * delta;
+			dx = -1;//-speed * delta;
 		}
 		if(Gdx.input.isKeyPressed(Keys.RIGHT)) {
-			dx = speed * delta;
+			dx = 1;//speed * delta;
 		}
 	}
 	
