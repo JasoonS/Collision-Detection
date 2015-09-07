@@ -20,26 +20,28 @@ public class CollisionDetection extends ApplicationAdapter {
 	// visually x goes down and y across
 	// this will make more sense when you compare it to what is drawn
 	int[][] map = {
-		{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}, 
-		{1,0,0,0,0,0,0,0,0,0,0,0,0,0,1}, 
-		{1,0,0,0,0,0,0,0,0,0,0,0,0,0,1}, 
-		{1,0,0,0,0,0,0,0,0,0,0,0,0,0,1}, 
-		{1,0,0,0,0,0,0,0,0,0,0,0,0,0,1}, 
-		{1,0,0,0,0,0,0,0,0,0,0,0,0,0,1}, 
-		{1,0,0,0,0,0,0,0,0,0,0,0,0,0,1}, 
-		{1,0,0,0,0,0,0,0,0,0,0,0,0,0,1}, 
-		{1,0,0,0,0,0,0,0,0,0,0,0,0,0,1}, 
-		{1,0,0,0,0,0,0,0,0,0,0,0,0,0,1}, 
-		{1,0,0,0,0,0,0,0,0,0,0,0,0,0,1}, 
-		{1,0,0,0,0,0,0,0,0,0,0,0,0,0,1}, 
-		{1,0,0,0,0,0,0,0,0,0,0,0,0,0,1}, 
-		{1,0,0,0,0,0,0,0,0,0,0,0,0,0,1}, 
-		{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}, 
-	};
+			{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}, 
+			{1,0,0,0,0,0,0,0,0,0,0,0,0,0,1}, 
+			{1,0,0,0,0,0,0,0,0,0,0,0,0,0,1}, 
+			{1,0,0,0,0,0,0,0,0,0,0,0,0,0,1}, 
+			{1,0,0,0,0,0,0,0,0,0,0,0,0,0,1}, 
+			{1,0,0,0,0,0,0,0,0,0,0,0,0,0,1}, 
+			{1,0,0,0,0,0,0,0,0,0,0,0,0,0,1}, 
+			{1,0,1,1,0,0,0,0,0,0,0,0,0,0,1}, 
+			{1,0,0,0,0,0,0,0,0,0,0,0,0,0,1}, 
+			{1,0,0,0,0,0,0,0,0,0,0,0,0,0,1}, 
+			{1,0,0,0,0,1,1,0,0,0,0,0,0,0,1}, 
+			{1,0,0,0,0,0,1,0,0,0,0,0,0,0,1}, 
+			{1,0,0,0,0,0,0,0,0,0,0,0,0,0,1}, 
+			{1,0,0,0,0,0,0,0,0,0,0,0,0,0,1}, 
+			{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}, 
+		};
 	int mapWidth = 15;
 	int mapHeight = 15;
 	int tileSize = 20;
 	Texture tileTexture;
+	
+	Quadtree quadtree;
 	
 	Player player;
 	ArrayList<Entity> entities = new ArrayList<Entity>();
@@ -53,26 +55,37 @@ public class CollisionDetection extends ApplicationAdapter {
 	  tileTexture = new Texture("block.png");  
 	  screenWidth = Gdx.graphics.getWidth();
 	  screenHeight = Gdx.graphics.getHeight();
+	  
+	  quadtree = new Quadtree(1, mapWidth + 1, mapHeight + 1 , (mapWidth - 2)*tileSize, (mapHeight - 2)*tileSize);
 	 	  
-	  // add some entities including a player
-	  player = new Player(this, 200, 150, 20, 20, 120.0f, new Texture("1.png"));
+	  // add some entities
+	  entities.add(new Entity(this, 56, 201, 120.0f, new Texture("2.png")));
+	  entities.add(new Entity(this, 154, 150, 120.0f, new Texture("3.png")));
+	  entities.add(new Entity(this, 226, 203, 120.0f, new Texture("4.png")));
+	  entities.add(new Entity(this, 45, 56, 120.0f, new Texture("5.png")));
+	  entities.add(new Entity(this, 184, 46, 120.0f, new Texture("5.png")));
+	  entities.add(new Entity(this, 104, 111, 120.0f, new Texture("7.png")));
+	  entities.add(new Entity(this, 173, 214, 120.0f, new Texture("6.png")));
+	  
+	  // add all entites to the quadtree
+	  quadtree.insert(entities);
+	  
+	  // create a player
+	  player = new Player(this, 200, 150, 120.0f, new Texture("1.png"));
 	  entities.add(player);
-	  entities.add(new Entity(this, 56, 200, 20, 20, 120.0f, new Texture("2.png")));
-	  entities.add(new Entity(this, 200, 200, 20, 20, 120.0f, new Texture("3.png")));
-	  entities.add(new Entity(this, 180, 50, 20, 20, 120.0f, new Texture("4.png")));
   }
   
   public void moveEntity(Entity e, float newX, float newY) {
-	//for this test only the player is moving
+	  // for this test only the player is moving
 	  if(!e.equals(player)) return;
 	  
 	  // just check x collisions keep y the same
-	  moveEntityInAxis(e, Axis.X, newX, e.y);
+	  moveEntityInAxis((Player) e, Axis.X, newX, e.y);
 	  // just check y collisions keep x the same
-	  moveEntityInAxis(e, Axis.Y, e.x, newY);
+	  moveEntityInAxis((Player) e, Axis.Y, e.x, newY);
   }
   
-  public void moveEntityInAxis(Entity e, Axis axis, float newX, float newY) {
+  public void moveEntityInAxis(Player e, Axis axis, float newX, float newY) {
 		  
 	  Direction direction;
 	  
@@ -87,15 +100,13 @@ public class CollisionDetection extends ApplicationAdapter {
 	  }
 
 	  if(!tileCollision(e, direction, newX, newY) && !entityCollision(e, direction, newX, newY)) {
-//		  System.out.println("M - x:" + newX + " y:" + newY);
 		  // full move with no collision
 		  e.move(newX, newY);
 	  }
-	  // else collision with wither tile or entity occurred 
+	  // else collision with wither tile or entity occurred, so no move
   }
   
-  public boolean tileCollision(Entity e, Direction direction, float newX, float newY) {
-	  boolean collision = false;
+  public boolean tileCollision(Player e, Direction direction, float newX, float newY) {
 
 	  // determine affected tiles
 	  int x1 = (int) Math.floor(Math.min(e.x, newX) / tileSize);
@@ -103,37 +114,35 @@ public class CollisionDetection extends ApplicationAdapter {
 	  int x2 = (int) Math.floor((Math.max(e.x, newX) + e.width - 0.1f) / tileSize);
 	  int y2 = (int) Math.floor((Math.max(e.y, newY) + e.height - 0.1f) / tileSize);
 	  
-	  // todo: add boundary checks...
-
 	  // tile checks
 	  for(int x = x1; x <= x2; x++) {
 		  for(int y = y1; y <= y2; y++) {
 			  if(map[x][y] == 1) {
-				  collision = true;	        
-				  e.tileCollision(map[x][y], x, y, newX, newY, direction);
+				  if (e.wallCollision(x, y, newX, newY)) return true;
 			  }
 		  }
 	  }
 	  
-	  return collision;
+	  return false;
   }
   
   public boolean entityCollision(Entity e1, Direction direction, float newX, float newY) {
-	  boolean collision = false;
+	  ArrayList<Entity> localEntities = new ArrayList();
+	  quadtree.retrieve(localEntities, e1);
 	  
-	  for(int i = 0; i < entities.size(); i++) {
-		  Entity e2 = entities.get(i);
+	  
+	  // Only checking local entities, from the QuadTree
+//	  System.out.println("Only checking against: " + localEntities.size() + "thanks to the Quadtree!");
+	  for(int i = 0; i < localEntities.size(); i++) {
+		  Entity e2 = localEntities.get(i);
 		  
-		  // we don't want to check for collisions between the same entity
-		  if(e1 != e2) {
-			  // bounding box
-			  if(newX < e2.x + e2.width && e2.x < newX + e1.width &&
-				  newY < e2.y + e2.height && e2.y < newY + e1.height) {
+		  // bounding box
+		  if(newX < e2.x + e2.width && e2.x < newX + e1.width &&
+			  newY < e2.y + e2.height && e2.y < newY + e1.height) {
 
-//				  System.out.println("entity within BOUNDING BOX around: " + newX + " " + newY);
-				  
-				  if(e1.entityCollision(e2, newX, newY, direction)) return true;
-			  }
+//			  System.out.println("entity within BOUNDING BOX around: " + newX + " " + newY);
+			  
+			  if(e1.entityCollision(e2, newX, newY, direction)) return true;
 		  }
 	  }
 	  
@@ -167,7 +176,7 @@ public class CollisionDetection extends ApplicationAdapter {
 	  // to offset where your map and entities are drawn change the viewport
 	  // see libgdx documentation
 	  
-	  Gdx.gl.glClearColor(0, 0, 0, 1);
+	  Gdx.gl.glClearColor((float)0.1, (float)0.7, (float)0.1, 1);
 	  Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 	  batch.begin();
     
@@ -180,7 +189,6 @@ public class CollisionDetection extends ApplicationAdapter {
 			  if(map[x][y] == 1) {
 				  batch.draw(tileTexture, x * tileSize, y * tileSize);
 			  }
-			  // draw other types here...
 		  }
 	  }
     
